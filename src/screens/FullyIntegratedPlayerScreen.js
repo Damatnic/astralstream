@@ -40,6 +40,10 @@ import RepeatMode from '../components/VideoPlayer/RepeatMode';
 import BookmarkManager from '../components/VideoPlayer/BookmarkManager';
 import SubtitleSettings from '../components/VideoPlayer/SubtitleSettings';
 import ShareMenu from '../components/VideoPlayer/ShareMenu';
+import DownloadManager from '../components/VideoPlayer/DownloadManager';
+import VideoEffects from '../components/VideoPlayer/VideoEffects';
+import FloatingVideo from '../components/VideoPlayer/FloatingVideo';
+import ZoomControls from '../components/VideoPlayer/ZoomControls';
 
 // Services
 import usePlayerStore from '../store/playerStore';
@@ -130,6 +134,15 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
     virtualizer: 0,
     loudness: 0,
   });
+  
+  // Additional features state
+  const [showDownloadManager, setShowDownloadManager] = useState(false);
+  const [showVideoEffects, setShowVideoEffects] = useState(false);
+  const [showFloatingVideo, setShowFloatingVideo] = useState(false);
+  const [showZoomControls, setShowZoomControls] = useState(false);
+  const [currentVideoEffects, setCurrentVideoEffects] = useState({});
+  const [videoZoom, setVideoZoom] = useState(1);
+  const [videoCrop, setVideoCrop] = useState({ mode: 'fill', crop: { x: 0, y: 0, width: 1, height: 1 } });
   
   // Store
   const { 
@@ -552,6 +565,33 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
     // Apply subtitle styling settings
     // This would be passed to SubtitleOverlay component
     updatePlayerSettings({ subtitleSettings: settings });
+  };
+
+  // Additional feature handlers
+  const handleApplyVideoEffects = (effects) => {
+    setCurrentVideoEffects(effects);
+    // Apply video effects through native modules or overlay
+  };
+
+  const handleZoomChange = (zoom) => {
+    setVideoZoom(zoom);
+    setCurrentZoom(zoom);
+  };
+
+  const handleCropChange = (cropData) => {
+    setVideoCrop(cropData);
+    // Apply crop settings to video
+  };
+
+  const handleDownloadComplete = (download) => {
+    Alert.alert('Download Complete', `${download.title} is ready for offline viewing`);
+  };
+
+  const toggleFloatingVideo = () => {
+    setShowFloatingVideo(!showFloatingVideo);
+    if (!showFloatingVideo) {
+      navigation.goBack();
+    }
   };
 
   const renderQualitySelector = () => (
@@ -997,6 +1037,44 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
                     <Icon name="share" size={20} color="#fff" />
                   </TouchableOpacity>
                 </View>
+                
+                {/* Additional advanced features row */}
+                <View style={styles.advancedButtonRow}>
+                  <TouchableOpacity
+                    onPress={() => setShowDownloadManager(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="download" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowVideoEffects(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="color-lens" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={toggleFloatingVideo}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="picture-in-picture" size={20} color={showFloatingVideo ? '#ff6b6b' : '#fff'} />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowZoomControls(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="zoom-in" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={togglePiP}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="picture-in-picture-alt" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           )}
@@ -1138,6 +1216,43 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
         currentTime={position}
         duration={duration}
       />
+
+      <DownloadManager
+        visible={showDownloadManager}
+        onClose={() => setShowDownloadManager(false)}
+        videoUrl={videoUrl}
+        videoTitle={video.filename || 'Video'}
+        onDownloadComplete={handleDownloadComplete}
+      />
+
+      <VideoEffects
+        visible={showVideoEffects}
+        onClose={() => setShowVideoEffects(false)}
+        onApplyEffects={handleApplyVideoEffects}
+        currentEffects={currentVideoEffects}
+      />
+
+      <ZoomControls
+        visible={showZoomControls}
+        onClose={() => setShowZoomControls(false)}
+        onZoomChange={handleZoomChange}
+        onCropChange={handleCropChange}
+        currentZoom={videoZoom}
+        currentCrop={videoCrop}
+      />
+
+      {showFloatingVideo && (
+        <FloatingVideo
+          videoUrl={videoUrl}
+          isVisible={showFloatingVideo}
+          onClose={() => setShowFloatingVideo(false)}
+          onExpand={() => {
+            setShowFloatingVideo(false);
+            // Return to fullscreen
+          }}
+          videoRef={videoRef}
+        />
+      )}
     </View>
   );
 }
@@ -1212,6 +1327,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   additionalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  advancedButtonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
