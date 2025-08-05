@@ -1,0 +1,75 @@
+# Maximum exclusion for EAS Build
+
+# Node modules - THE MAIN CULPRIT
+node_modules/
+**/node_modules/
+node_modules/**
+
+# Android build artifacts
+android/app/build/
+android/.gradle/
+android/build/
+android/.cxx/
+android/app/.cxx/
+**/.gradle/
+**/build/
+
+# Package lock files (EAS will use package.json)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# All non-essential files
+*.md
+*.txt
+*.log
+*.bat
+*.sh
+*.py
+.git/
+.gitignore
+.gitattributes
+.vscode/
+.idea/
+.expo/
+.expo-shared/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Exclude everything in android except essentials
+android/gradle/wrapper/gradle-wrapper.jar
+
+# Test and documentation
+__tests__/
+docs/
+documentation/
+coverage/
+*.test.js
+*.spec.js
+
+# Environment and configs
+.env
+.env.*
+.eslintrc*
+.prettierrc*
+.stylelintrc*
+
+# Media and archives
+*.mp4
+*.mp3
+*.mov
+*.avi
+*.zip
+*.tar
+*.gz
+*.rar
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+.cache/
+tmp/
+temp/

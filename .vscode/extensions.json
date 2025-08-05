@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "msjsdiag.vscode-react-native",
+    "dsznajder.es7-react-js-snippets",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "aaron-bond.better-comments",
+    "usernamehw.errorlens"
+  ]
+}

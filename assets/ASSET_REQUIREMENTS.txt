@@ -1,0 +1,31 @@
+
+AstralStream Asset Requirements
+==============================
+
+Please replace these placeholder files with actual images:
+
+1. icon.png - App icon (1024x1024 px)
+   - Should be your AstralStream logo
+   - Will be used for app icon on device
+
+2. splash.png - Splash screen (1242x2436 px)
+   - Shown while app is loading
+   - Should include AstralStream branding
+
+3. adaptive-icon.png - Android adaptive icon (1024x1024 px)
+   - Used for Android's adaptive icons
+   - Should be the main logo without background
+
+4. favicon.png - Web favicon (48x48 px)
+   - Used when running in web browser
+   - Small version of your logo
+
+Design suggestions:
+- Use the AstralStream cosmic/streaming theme
+- Primary color: #409CFF (blue)
+- Background: #1a1a1a (dark)
+- Include play button or streaming elements
+
+You can use online tools to generate these from your main logo:
+- https://www.appicon.co/ (for app icons)
+- https://realfavicongenerator.net/ (for favicons)
