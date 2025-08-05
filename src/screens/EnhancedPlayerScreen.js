@@ -26,6 +26,8 @@ import ResumeDialog from '../components/ResumeDialog/ResumeDialog';
 import VideoFilters from '../components/VideoPlayer/VideoFilters';
 import PlaylistManager from '../components/Playlist/PlaylistManager';
 import PiPHandler from '../components/VideoPlayer/PiPHandler';
+import NetworkQualityMonitor from '../components/VideoPlayer/NetworkQualityMonitor';
+import CastButton from '../components/VideoPlayer/CastButton';
 
 // Services
 import usePlayerStore from '../store/playerStore';
@@ -264,6 +266,11 @@ export default function EnhancedPlayerScreen({ route, navigation }) {
             visible={true}
           />
 
+          <NetworkQualityMonitor 
+            videoRef={videoRef}
+            visible={showControls && !isLocked}
+          />
+
           {isBuffering && (
             <View style={styles.bufferingContainer}>
               <ActivityIndicator size="large" color="#ff6b6b" />
@@ -281,6 +288,10 @@ export default function EnhancedPlayerScreen({ route, navigation }) {
                   {video.filename || 'Video Player'}
                 </Text>
                 <View style={styles.topRightControls}>
+                  <CastButton 
+                    videoUrl={videoUrl}
+                    videoTitle={video.filename || 'Video'}
+                  />
                   <TouchableOpacity 
                     onPress={() => setShowPlaylist(true)} 
                     style={styles.iconButton}
