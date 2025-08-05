@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   Share,
   Alert,
-  Clipboard,
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import * as Clipboard from 'expo-clipboard';
 
 const ShareMenu = ({
   visible,
@@ -66,7 +66,7 @@ const ShareMenu = ({
 
   const handleCopyLink = async () => {
     try {
-      await Clipboard.setString(videoUrl);
+      await Clipboard.setStringAsync(videoUrl);
       Alert.alert('Success', 'Video link copied to clipboard');
       onClose();
     } catch (error) {
@@ -77,7 +77,7 @@ const ShareMenu = ({
   const handleCopyTimestampLink = async () => {
     try {
       const timestampUrl = `${videoUrl}&t=${Math.floor(currentTime)}`;
-      await Clipboard.setString(timestampUrl);
+      await Clipboard.setStringAsync(timestampUrl);
       Alert.alert('Success', 'Timestamp link copied to clipboard');
       onClose();
     } catch (error) {

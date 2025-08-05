@@ -7,8 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ProgressViewIOS,
-  ProgressBarAndroid,
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -170,16 +168,10 @@ const DownloadManager = ({
   };
 
   const ProgressBar = ({ progress }) => {
-    if (Platform.OS === 'ios') {
-      return <ProgressViewIOS progress={progress} progressTintColor="#ff6b6b" />;
-    }
     return (
-      <ProgressBarAndroid
-        styleAttr="Horizontal"
-        indeterminate={false}
-        progress={progress}
-        color="#ff6b6b"
-      />
+      <View style={styles.progressBarContainer}>
+        <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
+      </View>
     );
   };
 
@@ -441,6 +433,18 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 10,
+  },
+  progressBarContainer: {
+    height: 4,
+    backgroundColor: '#444',
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginTop: 5,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#ff6b6b',
+    borderRadius: 2,
   },
 });
 
