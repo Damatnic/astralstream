@@ -34,6 +34,12 @@ import PlaylistManager from '../components/Playlist/PlaylistManager';
 import PiPHandler from '../components/VideoPlayer/PiPHandler';
 import NetworkQualityMonitor from '../components/VideoPlayer/NetworkQualityMonitor';
 import CastButton from '../components/VideoPlayer/CastButton';
+import ChapterMarkers from '../components/VideoPlayer/ChapterMarkers';
+import AudioEqualizer from '../components/VideoPlayer/AudioEqualizer';
+import RepeatMode from '../components/VideoPlayer/RepeatMode';
+import BookmarkManager from '../components/VideoPlayer/BookmarkManager';
+import SubtitleSettings from '../components/VideoPlayer/SubtitleSettings';
+import ShareMenu from '../components/VideoPlayer/ShareMenu';
 
 // Services
 import usePlayerStore from '../store/playerStore';
@@ -106,6 +112,24 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showBrightnessSlider, setShowBrightnessSlider] = useState(false);
   const [seekAmount, setSeekAmount] = useState(0);
+  
+  // New features state
+  const [showChapters, setShowChapters] = useState(false);
+  const [showEqualizer, setShowEqualizer] = useState(false);
+  const [showRepeatMode, setShowRepeatMode] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showSubtitleSettings, setShowSubtitleSettings] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [repeatMode, setRepeatMode] = useState('none'); // none, single, all, ab
+  const [abRepeatPoints, setABRepeatPoints] = useState({ start: null, end: null });
+  const [chapters, setChapters] = useState([]);
+  const [currentEQ, setCurrentEQ] = useState({
+    bass: 0,
+    midrange: 0,
+    treble: 0,
+    virtualizer: 0,
+    loudness: 0,
+  });
   
   // Store
   const { 
@@ -270,9 +294,33 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
       Alert.alert('Playback Error', 'Failed to play video');
     }
     
-    // Auto play next in playlist
-    if (status.didJustFinish && currentPlaylist && currentIndex < currentPlaylist.videos.length - 1) {
-      playNext();
+    // Handle repeat modes and playlist
+    if (status.didJustFinish) {
+      if (repeatMode === 'single') {
+        // Repeat single video
+        handleSeek(0);
+        handlePlayPause(true);
+      } else if (repeatMode === 'all' && currentPlaylist) {
+        // Repeat all playlist
+        if (currentIndex >= currentPlaylist.videos.length - 1) {
+          // Go back to first video
+          setCurrentIndex(0);
+          const firstVideo = currentPlaylist.videos[0];
+          navigation.replace('Player', { video: firstVideo, playlist: currentPlaylist });
+        } else {
+          playNext();
+        }
+      } else if (repeatMode === 'none' && currentPlaylist && currentIndex < currentPlaylist.videos.length - 1) {
+        // Auto play next in playlist
+        playNext();
+      }
+    }
+    
+    // Handle A-B repeat
+    if (repeatMode === 'ab' && abRepeatPoints.start !== null && abRepeatPoints.end !== null) {
+      if (status.positionMillis / 1000 >= abRepeatPoints.end) {
+        handleSeek(abRepeatPoints.start);
+      }
     }
   };
 
@@ -478,6 +526,32 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
       return `${hours}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // New feature handlers
+  const handleApplyEqualizer = (eqSettings) => {
+    setCurrentEQ(eqSettings);
+    // In a real implementation, this would apply audio effects
+    // Requires native module integration
+  };
+
+  const handleRepeatModeChange = (mode) => {
+    setRepeatMode(mode);
+    if (mode === 'ab') {
+      // A-B repeat mode will be handled by handleSetABRepeat
+    }
+  };
+
+  const handleSetABRepeat = (startTime, endTime) => {
+    setABRepeatPoints({ start: startTime, end: endTime });
+    setRepeatMode('ab');
+    // Implement A-B repeat logic in playback status update
+  };
+
+  const handleApplySubtitleSettings = (settings) => {
+    // Apply subtitle styling settings
+    // This would be passed to SubtitleOverlay component
+    updatePlayerSettings({ subtitleSettings: settings });
   };
 
   const renderQualitySelector = () => (
@@ -874,6 +948,55 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
                     {currentFilters.speed}x
                   </Text>
                 </View>
+                
+                {/* Additional features row */}
+                <View style={styles.additionalButtonRow}>
+                  <TouchableOpacity
+                    onPress={() => setShowChapters(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="view-list" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowBookmarks(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="bookmark" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowRepeatMode(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon 
+                      name={repeatMode === 'single' ? 'repeat-one' : 'repeat'} 
+                      size={20} 
+                      color={repeatMode !== 'none' ? '#ff6b6b' : '#fff'} 
+                    />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowEqualizer(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="equalizer" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowSubtitleSettings(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="settings" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowShareMenu(true)}
+                    style={styles.iconButton}
+                  >
+                    <Icon name="share" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           )}
@@ -963,6 +1086,58 @@ export default function FullyIntegratedPlayerScreen({ route, navigation }) {
           </View>
         </TouchableWithoutFeedback>
       )}
+
+      {/* New Feature Modals */}
+      <ChapterMarkers
+        visible={showChapters}
+        onClose={() => setShowChapters(false)}
+        chapters={chapters}
+        currentTime={position}
+        onSeekToChapter={handleSeek}
+        duration={duration}
+      />
+
+      <AudioEqualizer
+        visible={showEqualizer}
+        onClose={() => setShowEqualizer(false)}
+        onApplyEQ={handleApplyEqualizer}
+      />
+
+      <RepeatMode
+        visible={showRepeatMode}
+        onClose={() => setShowRepeatMode(false)}
+        repeatMode={repeatMode}
+        onRepeatModeChange={handleRepeatModeChange}
+        currentTime={position}
+        duration={duration}
+        onSetABRepeat={handleSetABRepeat}
+      />
+
+      <BookmarkManager
+        visible={showBookmarks}
+        onClose={() => setShowBookmarks(false)}
+        videoUrl={videoUrl}
+        videoTitle={video.filename || 'Video'}
+        currentTime={position}
+        duration={duration}
+        onSeekToBookmark={handleSeek}
+        thumbnail={video.thumbnail}
+      />
+
+      <SubtitleSettings
+        visible={showSubtitleSettings}
+        onClose={() => setShowSubtitleSettings(false)}
+        onApplySettings={handleApplySubtitleSettings}
+      />
+
+      <ShareMenu
+        visible={showShareMenu}
+        onClose={() => setShowShareMenu(false)}
+        videoUrl={videoUrl}
+        videoTitle={video.filename || 'Video'}
+        currentTime={position}
+        duration={duration}
+      />
     </View>
   );
 }
@@ -1035,6 +1210,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  additionalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
   },
   iconButton: {
     padding: 10,
