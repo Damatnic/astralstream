@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 // Import screens
 import HomeScreen from './src/screens/HomeScreen';
 import PlayerScreen from './src/screens/PlayerScreen';
+import EnhancedPlayerScreen from './src/screens/EnhancedPlayerScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import StreamScreen from './src/screens/StreamScreen';
 
@@ -84,7 +85,7 @@ export default function App() {
             <Stack.Screen name="Main" component={TabNavigator} />
             <Stack.Screen
               name="Player"
-              component={PlayerScreen}
+              component={EnhancedPlayerScreen}
               options={{
                 animation: 'slide_from_bottom',
               }}
